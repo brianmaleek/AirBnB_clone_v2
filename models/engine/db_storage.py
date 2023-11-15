@@ -41,15 +41,25 @@ class DBStorage:
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        """ returns a dictionary of all objects """
+        """
+        Query on the current database session all objects of the given class.
+        If cls is None, queries all types of objects.
+
+        Return:
+        Dict of queried classes in the format <class name>.<obj id> = obj.
+        """
         if cls is None:
-            objs = []
-            for clss in classes.values():
-                objs += self.__session.query(clss).all()
+            objs = self.__session.query(State).all() + \
+                self.__session.query(City).all() + \
+                self.__session.query(User).all() + \
+                self.__session.query(Place).all() + \
+                self.__session.query(Review).all() + \
+                self.__session.query(Amenity).all()
         else:
-            objs = self.__session.query(cls).all()
-        return {"{}.{}".format(type(obj).__name__, obj.id):
-                obj for obj in objs}
+            if isinstance(cls, str):
+                cls = eval(cls)
+                objs = self.__session.query(cls)
+        return {"{}.{}".format(type(o).__name__, o.id): o for o in objs}
 
     def new(self, obj):
         """ adds a new object """
